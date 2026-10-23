@@ -1,0 +1,6 @@
+version: v1.25.0
+ignore:
+  SNYK-JAVA-ORGGLASSFISHJAXB-20883142:
+    - '*':
+        reason: Sin parche disponible; dependencia transitiva de Hibernate
+        expires: 2026-12-31T00:00:00.000Z
