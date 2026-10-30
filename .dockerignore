@@ -1,0 +1,31 @@
+# Directorios y archivos de build
+target/
+
+# Control de versiones
+.git
+.gitignore
+
+# Configuración de CI/CD
+.github/
+
+# IDEs
+.idea/
+.vscode/
+*.iml
+
+# Documentación
+*.md
+
+# Archivos de Docker
+Dockerfile
+.dockerignore
+
+# Seguridad
+.snyk
+
+# Carpeta de conclusiones
+conclusiones/
+
+# Variables de entorno sensibles
+.env
+.env.*

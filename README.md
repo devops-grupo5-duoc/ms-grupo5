@@ -172,3 +172,140 @@ Durante el desarrollo del proyecto se utilizó ChatGPT como herramienta de apoyo
 
 Las respuestas proporcionadas por la herramienta fueron revisadas y validadas por los integrantes del equipo antes de ser utilizadas en el proyecto.
 
+## Ejecución local con Docker Compose
+
+El proyecto utiliza Docker Compose para ejecutar el microservicio `ms-pedido` junto con una base de datos MySQL 8.4.
+
+Esta configuración permite levantar ambos servicios de forma conjunta, sin necesidad de instalar MySQL directamente en el computador.
+
+### Requisitos
+
+Para ejecutar el proyecto se necesita:
+
+- Docker Desktop instalado y en ejecución.
+- Docker Compose disponible.
+- Tener descargado el repositorio del proyecto.
+
+### Configuración de variables de entorno
+
+El proyecto incluye un archivo `.env.example` con las variables necesarias para configurar MySQL y el puerto de la aplicación.
+
+Desde la carpeta raíz del proyecto, crear una copia del archivo:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Luego, abrir `.env` y reemplazar las contraseñas de ejemplo por contraseñas propias.
+
+Las variables utilizadas son:
+
+| Variable | Descripción |
+|---|---|
+| `MYSQL_DATABASE` | Nombre de la base de datos. |
+| `MYSQL_USER` | Usuario utilizado por la aplicación para conectarse a MySQL. |
+| `MYSQL_PASSWORD` | Contraseña del usuario de MySQL. |
+| `MYSQL_ROOT_PASSWORD` | Contraseña del administrador de MySQL. |
+| `APP_PORT` | Puerto de acceso al microservicio desde el computador. |
+
+El archivo `.env` está excluido del repositorio mediante `.gitignore`, para evitar publicar credenciales locales.
+
+### Construcción e inicio de contenedores
+
+Para construir la imagen de Spring Boot e iniciar los servicios, ejecutar:
+
+```powershell
+docker compose up --build -d
+```
+
+Este comando construye la imagen del microservicio utilizando el `Dockerfile` y levanta los contenedores de Spring Boot y MySQL.
+
+La opción `-d` permite ejecutarlos en segundo plano.
+
+### Verificación de los contenedores
+
+Para revisar el estado de los servicios:
+
+```powershell
+docker compose ps
+```
+
+Se espera que los servicios `mysql` y `ms-pedido` estén en ejecución.
+
+MySQL incluye un `healthcheck` que comprueba su disponibilidad. Además, el servicio `ms-pedido` utiliza `depends_on` para esperar hasta que MySQL se encuentre saludable antes de iniciar.
+
+### Revisión de los logs
+
+Para consultar los registros del microservicio:
+
+```powershell
+docker compose logs ms-pedido
+```
+
+Para consultar los registros de MySQL:
+
+```powershell
+docker compose logs mysql
+```
+
+Estos comandos permiten revisar el inicio de los servicios y detectar posibles errores de conexión.
+
+### Acceso a la API
+
+Por defecto, la aplicación utiliza el puerto `8080`.
+
+El endpoint de pedidos se encuentra disponible en:
+
+```text
+http://localhost:8080/api/v1/pedidos
+```
+
+Se puede realizar una solicitud GET desde Postman para consultar los pedidos registrados.
+
+Si el puerto `8080` está ocupado, se puede modificar la variable `APP_PORT` del archivo `.env`, por ejemplo:
+
+```env
+APP_PORT=8081
+```
+
+En ese caso, la dirección de acceso será:
+
+```text
+http://localhost:8081/api/v1/pedidos
+```
+
+El cambio de puerto afecta el acceso desde el computador, mientras que Spring Boot continúa utilizando el puerto `8080` dentro del contenedor.
+
+### Persistencia de los datos
+
+La configuración utiliza un volumen llamado `mysql_data`, asociado al directorio de almacenamiento de MySQL.
+
+Esto permite conservar los datos aunque los contenedores sean detenidos o recreados, siempre que no se elimine el volumen.
+
+### Detención de los servicios
+
+Para detener y retirar los contenedores:
+
+```powershell
+docker compose down
+```
+
+Este comando conserva el volumen de MySQL.
+
+Para volver a iniciar los servicios:
+
+```powershell
+docker compose up -d
+```
+
+No se recomienda utilizar `docker compose down -v` si se desea conservar la información, ya que esa opción también elimina los volúmenes definidos por el proyecto.
+
+### Problemas frecuentes
+
+**Puerto ocupado:** si el puerto `8080` está siendo utilizado por otra aplicación, modificar `APP_PORT` en el archivo `.env` y recrear los contenedores.
+
+**Docker no está iniciado:** verificar que Docker Desktop esté ejecutándose antes de utilizar Docker Compose.
+
+**Error de conexión con MySQL:** revisar el estado del servicio y sus registros mediante `docker compose ps` y `docker compose logs mysql`.
+
+**Cambios en las contraseñas:** las variables de inicialización de MySQL se aplican cuando se crea una base de datos nueva. Si ya existe un volumen con datos, modificar `.env` no cambia automáticamente las contraseñas almacenadas en MySQL.
