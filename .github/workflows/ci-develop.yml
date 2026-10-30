@@ -7,10 +7,19 @@ on:
 
   pull_request:
     branches:
+      - develop
       - main
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
   build-and-test:
+    name: Compilar y probar
     runs-on: ubuntu-latest
 
     steps:
@@ -28,10 +37,61 @@ jobs:
         run: chmod +x mvnw
 
       - name: Ejecutar pruebas
-        run: ./mvnw test
+        run: ./mvnw -B verify
 
-      - name: Construir imagen Docker
-        run: docker build -t ms-pedido:ci .
+      - name: Subir reportes de pruebas
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reportes-pruebas
+          path: target/surefire-reports
+          if-no-files-found: warn
 
-      - name: Construir aplicación
-        run: ./mvnw clean package -DskipTests
+  integracion-docker:
+    name: Integración con Docker Compose
+    needs: build-and-test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar código
+        uses: actions/checkout@v4
+
+      - name: Crear .env temporal para la prueba
+        run: |
+          cat > .env <<'EOF'
+          MYSQL_DATABASE=ms_pedido
+          MYSQL_USER=appuser
+          MYSQL_PASSWORD=ci_password_temporal
+          MYSQL_ROOT_PASSWORD=ci_root_temporal
+          APP_PORT=8080
+          EOF
+
+      - name: Validar docker-compose.yml
+        run: docker compose config -q
+
+      - name: Construir y levantar servicios
+        run: docker compose up -d --build
+
+      - name: Esperar a que la API esté saludable
+        run: |
+          for i in $(seq 1 30); do
+            if curl -fsS http://localhost:8080/actuator/health | grep -q '"status":"UP"'; then
+              echo "API saludable"
+              exit 0
+            fi
+            echo "Esperando API... intento $i"
+            sleep 5
+          done
+          echo "La API no respondió a tiempo"
+          exit 1
+
+      - name: Probar endpoint de pedidos
+        run: curl -fsS http://localhost:8080/api/v1/pedidos
+
+      - name: Mostrar logs si falló
+        if: failure()
+        run: docker compose logs --tail=100
+
+      - name: Apagar servicios
+        if: always()
+        run: docker compose down -v
