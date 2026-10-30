@@ -1,0 +1,20 @@
+Antonella Castillo Salgado:
+
+En esta evaluación aprendí más sobre cómo se relacionan
+las herramientas que hemos utilizado en el proyecto.
+
+En mi caso, trabajé con Docker Compose, donde aprendí
+cómo levantar la aplicación y la base de datos mediante
+contenedores.
+
+También pude comprender mejor cómo funcionan los pipelines,
+ya que permiten automatizar las pruebas, revisar la seguridad
+del código y realizar el despliegue.
+
+Además, reforcé el uso de GitFlow y los Pull Requests para
+trabajar de manera más ordenada con mis compañeros.
+
+Aunque todavía hay cosas que me cuestan, siento que esta
+evaluación me ayudó a entender mejor cómo se conectan todas
+estas herramientas y la importancia de saber lo que estamos
+haciendo.
