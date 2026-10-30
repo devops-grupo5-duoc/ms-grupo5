@@ -21,4 +21,9 @@ public class InfoController {
     public Map<String, String> info() {
         return Map.of("servicio", "ms-pedido", "version", version);
     }
+
+    @GetMapping("/test1")
+    public String test1() {
+        return "test1";
+    }
 }
