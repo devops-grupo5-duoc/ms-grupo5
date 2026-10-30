@@ -1,0 +1,4 @@
+**Eduardo Fernández**:
+Durante el desarrollo de esta evalucion aprendi mas sobre conceptos de la nube, ademas de los workflows
+y de como pueden ayudar para un flujo de trabajo con una cultura devops, tambien abordamos temas de seguridad y calidad de software
+apoyandonos en servicios como sonarqube y snyk.
