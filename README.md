@@ -1,6 +1,7 @@
+
 # MS Pedido
 
-Microservicio para la gestión de pedidos.
+Microservicio desarrollado con Java 21, Spring Boot y Maven para la gestión de pedidos. El repositorio utiliza GitFlow y GitHub Actions para automatizar pruebas, análisis de seguridad, construcción de imágenes Docker y despliegue.
 
 ## Integrantes
 
@@ -10,302 +11,245 @@ Microservicio para la gestión de pedidos.
 
 ## Convenciones de commits
 
-Se utiliza una convención basada en **Conventional Commits**. Cada commit debe tener el formato:
+Se utiliza una convención basada en **Conventional Commits**:
 
 ```text
 tipo(alcance): descripción breve
 ```
 
-Tipos permitidos:
+Tipos utilizados:
 
 - `feat`: incorpora una funcionalidad.
 - `fix`: corrige un error.
-- `refactor`: reorganiza el código sin cambiar su comportamiento.
-- `test`: agrega o modifica pruebas.
-- `docs`: actualiza la documentación.
-- `chore`: realiza tareas de mantenimiento o configuración.
+- `refactor`: reorganiza código sin cambiar su comportamiento.
+- `test`: incorpora o modifica pruebas.
+- `docs`: actualiza documentación.
+- `chore`: mantenimiento y configuración.
+- `ci`: cambios en los pipelines.
+- `release`: preparación de versiones.
 
-Reglas:
+El alcance entre paréntesis puede omitirse en los títulos de Pull Requests dirigidos a `main`, porque el validador actual exige estrictamente `tipo: descripción`.
 
-- Escribir la descripción en modo imperativo y en minúsculas.
-- Mantener el asunto breve, preferentemente de hasta 72 caracteres.
-- Realizar commits pequeños, relacionados con un único cambio.
-- No incluir credenciales, archivos generados ni cambios sin relación.
+Se procura escribir asuntos breves, descriptivos, en minúsculas y relacionados con un único cambio. No deben incluirse contraseñas ni secretos en los commits.
 
 Ejemplos:
 
 ```text
 feat(pedidos): agregar actualización del estado
 fix(pedidos): validar identificador inexistente
-test(service): cubrir creación de pedidos
-docs(readme): documentar flujo de contribución
+test(pedidos): agregar pruebas unitarias del servicio
+docs: documentar pipelines de la entrega 2
 ```
 
-## Gitflow y naming de ramas
+## GitFlow y nombres de ramas
 
-El proyecto utiliza **Gitflow** como estrategia de trabajo. Gitflow separa el desarrollo continuo de las versiones estables mediante una rama `develop` y una rama `main`. Esto permite organizar entregas, preparar releases y corregir problemas urgentes sin mezclar cambios incompletos con producción.
+El proyecto utiliza `main` como rama estable y `develop` para integrar los cambios en desarrollo. Las ramas `feature/*` se crean para cambios funcionales; `hotfix/*` se utiliza para correcciones urgentes sobre la versión estable.
 
-Se elige Gitflow sobre **Trunk-Based Development** porque el equipo necesita trabajar con versiones y entregas controladas, mantener una rama estable y agrupar cambios antes de publicarlos. Trunk-Based Development favorece integrar cambios pequeños directamente en una única rama principal y requiere una integración continua muy frecuente, feature flags y una disciplina de despliegue más madura. Para este proyecto, Gitflow ofrece una separación más clara entre desarrollo, preparación de release y producción.
+También se usan ramas de trabajo descriptivas, por ejemplo `docs/*`, `test/*`, `refactor/*` o `chore/*`. Esta es una adaptación de GitFlow al tamaño y necesidades del equipo.
 
-Las ramas deben utilizar el formato:
+Convención:
 
 ```text
 tipo/descripcion-corta
 ```
 
-Tipos de rama:
-
-- `main`: contiene únicamente versiones estables listas para producción.
-- `develop`: integra el trabajo terminado que formará parte de la próxima versión.
-- `feature/`: nueva funcionalidad, creada desde `develop` y fusionada hacia `develop`.
-- `fix/`: corrección de errores.
-- `release/`: preparación de una versión, creada desde `develop` y fusionada hacia `main` y `develop`.
-- `hotfix/`: corrección urgente sobre producción, creada desde `main` y fusionada hacia `main` y `develop`.
-- `refactor/`: mejora interna sin cambio funcional, creada desde `develop`.
-- `test/`: incorporación o ajuste de pruebas.
-- `docs/`: cambios de documentación.
-- `chore/`: mantenimiento y configuración.
-
 Ejemplos:
 
 ```text
 feature/crear-pedido
-fix/validar-estado-pedido
-release/1.0.0
-hotfix/corregir-calculo-total
-test/pedido-service
-docs/actualizar-readme
+hotfix/validacion-sucursal
+docs/actualizar-readme-ep2
 ```
 
-Se recomienda usar nombres descriptivos, en minúsculas, sin espacios ni acentos. Las ramas de trabajo deben mantenerse actualizadas con su rama base antes de solicitar el merge.
+### Flujo de colaboración
 
-## Flujo de merge
+1. Crear una rama de trabajo a partir de `develop`, o de `main` cuando se trate de un `hotfix`.
+2. Realizar los cambios y registrarlos con commits descriptivos.
+3. Ejecutar pruebas y revisar los archivos modificados.
+4. Subir la rama y abrir un Pull Request.
+5. Revisar comentarios y resultados de GitHub Actions antes de fusionar.
+6. Integrar las ramas de trabajo a `develop`; los cambios para la versión estable llegan a `main` desde `develop` o `hotfix/*`.
 
-1. Crear una rama `feature`, `fix`, `refactor`, `test`, `docs` o `chore` desde `develop`.
-2. Implementar el cambio mediante commits pequeños y descriptivos.
-3. Ejecutar las pruebas y verificar que el proyecto compile correctamente.
-4. Actualizar la rama con la última versión de `develop` y resolver conflictos localmente.
-5. Abrir un Pull Request hacia `develop` con una descripción del cambio, su motivación y las pruebas realizadas.
-6. Solicitar al menos una revisión de otro integrante del equipo.
-7. Resolver las observaciones y actualizar el Pull Request.
-8. Hacer merge únicamente cuando las revisiones y verificaciones hayan sido aprobadas.
-9. Eliminar la rama de trabajo después del merge.
+El workflow `control-pr-develop.yml` comprueba que el origen de los Pull Requests a `develop` tenga un nombre permitido. El workflow `control-pr-main.yml` exige que el origen sea `develop` o `hotfix/*`, que el título tenga un prefijo válido seguido de dos puntos y que la descripción no esté vacía.
 
-Para publicar una versión, crear una rama `release/x.y.z` desde `develop`, completar allí los ajustes finales y abrir Pull Requests hacia `main` y `develop`. Después del merge a `main`, crear una etiqueta con la versión, por ejemplo `v1.0.0`. Para una corrección urgente, crear `hotfix/...` desde `main`, validar el cambio y fusionarlo tanto en `main` como en `develop`.
+La revisión de cambios considera funcionalidad, manejo de errores, pruebas, claridad del código, ausencia de credenciales y compatibilidad con el resto del microservicio.
 
-Todos los merges deben realizarse mediante Pull Request. Para ramas de trabajo se recomienda **Squash and merge**; para `release` y `hotfix` se debe conservar la trazabilidad de la versión mediante un merge commit cuando sea necesario.
+## Pipelines implementados
 
-## Pipelines y sus funciones
+Los archivos están en `.github/workflows/`. Se describen aquí sus eventos y pasos reales, diferenciando la configuración de los resultados observados.
 
-Los pipelines automatizan las validaciones y entregas del microservicio. Deben ejecutarse en cada Pull Request y en las ramas protegidas (`develop` y `main`).
+| Archivo | Activación | Función |
+| --- | --- | --- |
+| `ci-develop.yml` | `push` a `develop`; Pull Requests a `develop` y `main` | Ejecutar Maven y validar el sistema con Docker Compose. |
+| `security-pipeline.yml` | `push` y Pull Requests a `develop`/`main`; llamado desde otro workflow | Ejecutar Snyk y SonarCloud. |
+| `cd-main.yml` | `push` a `main` o ejecución manual | Verificar, construir y publicar imagen, desplegar en EC2 y ejecutar pruebas de humo. |
+| `control-pr-develop.yml` | Pull Requests hacia `develop` | Validar el nombre de la rama de origen. |
+| `control-pr-main.yml` | Pull Requests hacia `main` | Validar origen, título y descripción. |
+| `notify-on-failure.yml` | Finalización de ciertos workflows | Intentar registrar un Issue cuando concluyen con error. |
 
-### Pipeline de Integración Continua (CI)
+### Integración continua: `ci-develop.yml`
 
-Se ejecuta al crear o actualizar un Pull Request y al hacer push a `develop` o `main`.
+El trabajo **Compilar y probar** descarga el código, configura Eclipse Temurin 21, habilita Maven Wrapper y ejecuta:
 
-- Descargar el código y configurar la versión de Java.
-- Restaurar dependencias de Maven.
-- Compilar el proyecto con Maven.
-- Ejecutar las pruebas unitarias y de integración.
-- Publicar los reportes de pruebas.
-- Informar el resultado para impedir el merge si falla una validación.
+```bash
+./mvnw -B verify
+```
 
-### Pipeline de Calidad y Seguridad
+Los reportes de pruebas (`target/surefire-reports`) se publican como artefactos, incluso cuando las pruebas fallan.
 
-Se ejecuta junto con el pipeline de CI y antes de aceptar un Pull Request.
+Si el trabajo anterior es exitoso, **Integración con Docker Compose** crea un `.env` temporal exclusivo del entorno de CI, valida `docker-compose.yml`, construye y levanta los servicios, espera que `/actuator/health` responda con estado `UP` y consulta `/api/v1/pedidos`. Al terminar, ejecuta la limpieza de los contenedores temporales.
 
-- Revisar formato, convenciones y calidad del código.
-- Analizar cobertura de pruebas.
-- Detectar vulnerabilidades en dependencias.
-- Buscar secretos o credenciales expuestas.
-- Revisar la calidad de la imagen, si se construye un contenedor.
-- Generar un reporte para corregir hallazgos antes del despliegue.
+### Pruebas automatizadas
 
-### Pipeline de Construcción y Publicación
+La rama `develop` incluye `src/test/java/com/example/ms_pedido/service/PedidoServiceTest.java`, con ocho pruebas unitarias del servicio de pedidos. Comprueban consultas, creación, actualización parcial, eliminación y comportamiento ante registros inexistentes. También existe la prueba de contexto de Spring Boot.
 
-Se ejecuta después de que CI y calidad hayan finalizado correctamente.
+La ejecución del workflow **CI #42**, correspondiente al commit `0ed9043` en `develop`, terminó en estado **Success**: `Compilar y probar` e `Integración con Docker Compose` fueron exitosos. En ese ciclo se registraron nueve pruebas exitosas, sin fallos ni errores.
 
-- Construir el artefacto ejecutable del proyecto.
-- Generar la imagen Docker del microservicio, si corresponde.
-- Etiquetar la imagen con el commit y la versión del release.
-- Publicar el artefacto o la imagen en el registro configurado.
-- Conservar los artefactos para auditoría y despliegues posteriores.
+**Estado de ramas al preparar esta entrega:** las ocho pruebas adicionales permanecen en `develop`. Su incorporación posterior a `main` mediante el PR #40 fue revertida mediante un `hotfix`; por tanto, no debe afirmarse que el archivo `PedidoServiceTest.java` existe actualmente en `main`.
 
-### Pipeline de Despliegue Continuo (CD)
+### Calidad y seguridad: `security-pipeline.yml`
 
-Se ejecuta cuando se fusiona un Pull Request de release o hotfix hacia `main`.
+El trabajo **Snyk Security Scan** configura Java 21, instala Snyk y examina las dependencias declaradas en `pom.xml`:
 
-- Desplegar primero en un ambiente de pruebas o staging.
-- Ejecutar pruebas de humo y verificaciones de salud.
-- Solicitar aprobación manual antes de producción cuando aplique.
-- Desplegar la versión aprobada en producción.
-- Verificar disponibilidad del servicio y sus endpoints principales.
-- Notificar el resultado y permitir rollback a la última versión estable.
+```bash
+snyk test --file=pom.xml --severity-threshold=high --json-file-output=snyk-report.json
+```
 
-La promoción entre ambientes debe utilizar el mismo artefacto validado en CI. Ningún pipeline debe incluir secretos directamente en el repositorio; deben configurarse como variables protegidas o secretos del proveedor de CI/CD.
+Un hallazgo no exceptuado de severidad alta o crítica puede provocar que este paso falle. El reporte JSON se intenta publicar como artefacto aunque el análisis falle. El repositorio también contiene un archivo `.snyk` con una excepción temporal para una vulnerabilidad transitiva; esa excepción debe revisarse periódicamente y no equivale a que no existan riesgos.
 
-## Estrategia de revisión
+El trabajo **SonarCloud Analysis** depende del resultado de Snyk. Ejecuta el análisis mediante Maven y espera la evaluación del *Quality Gate* (`sonar.qualitygate.wait=true`). Que el análisis termine correctamente no significa, por sí solo, que exista cobertura de pruebas importada a SonarCloud.
 
-Cada Pull Request debe ser revisado por al menos un integrante distinto de quien realizó el cambio. La revisión debe comprobar:
+Además, en la configuración de seguridad del repositorio se habilitaron **Dependabot alerts** y **Dependabot security updates** para detectar vulnerabilidades conocidas en dependencias y proponer actualizaciones cuando hay una corrección disponible. En la comprobación realizada no había alertas abiertas. Las actualizaciones periódicas de versiones mediante `dependabot.yml` no estaban configuradas.
 
-- Correctitud funcional y cumplimiento del objetivo.
-- Claridad, legibilidad y coherencia con la estructura del proyecto.
-- Manejo de errores y validación de entradas.
-- Cobertura y calidad de las pruebas.
-- Ausencia de credenciales o información sensible.
-- Compatibilidad con las funcionalidades existentes.
+### Construcción, publicación y despliegue: `cd-main.yml`
 
-Los comentarios deben ser concretos, respetuosos y orientados a una mejora. Las observaciones bloqueantes deben resolverse antes del merge; las sugerencias menores pueden registrarse como tareas posteriores cuando el equipo lo acuerde.
+El workflow **CD - Main** se activa al hacer `push` a `main` o manualmente mediante `workflow_dispatch`. Sus trabajos son:
 
-## Responsabilidades del equipo
+1. **Seguridad:** reutiliza `security-pipeline.yml`.
+2. **Pruebas unitarias:** ejecuta `./mvnw -B verify` y publica los reportes.
+3. **Publicar imagen Docker:** tras superar seguridad y pruebas, construye la imagen con Docker Buildx y la publica en GitHub Container Registry (`ghcr.io`). La etiqueta utiliza el SHA del commit y también `latest`.
+4. **Desplegar en EC2:** abre una conexión SSH con las credenciales guardadas en GitHub Secrets, obtiene el estado de `main`, inicia sesión en GHCR y utiliza `docker compose pull ms-pedido` y `docker compose up -d --remove-orphans` para actualizar los contenedores.
+5. **Prueba de humo:** espera que la API responda correctamente en `/actuator/health`, consulta `/api/v1/pedidos` y comprueba mediante `/api/v1/info` que se esté ejecutando el SHA esperado.
 
-Todos los integrantes pueden crear ramas, implementar cambios y revisar Pull Requests. Quien desarrolla un cambio es responsable de:
+La configuración utiliza los secretos `EC2_HOST`, `EC2_USER` y `EC2_SSH_KEY` para la conexión; los valores secretos no deben incluirse en el repositorio ni en la documentación.
 
-- Mantener actualizada la rama de trabajo.
-- Ejecutar y documentar las validaciones realizadas.
-- Responder las observaciones de la revisión.
-- Confirmar que el Pull Request esté listo antes de solicitar el merge.
+**Trazabilidad:** los Pull Requests identifican los cambios y revisiones; cada ejecución de GitHub Actions queda asociada a una rama y un commit; la imagen Docker se etiqueta con el SHA y el despliegue comprueba el commit publicado.
 
-## Uso de Inteligencia Artificial
+**Resultados y limitaciones conocidas:** existe evidencia de una ejecución anterior exitosa del despliegue. Sin embargo, un intento posterior relacionado con el PR #40 falló antes de conectarse al servidor EC2 por un tiempo de espera agotado en SSH (`puerto 22`). Este fallo de conectividad no demuestra un error del código, pero tampoco permite afirmar que ese último despliegue se completó. El workflow de notificación también registró anteriormente un fallo de permisos (`403`) al intentar crear un Issue; las ejecuciones posteriores omitidas (*skipped*) no acreditan que esa autorización se haya corregido.
 
-Durante el desarrollo del proyecto se utilizó ChatGPT como herramienta de apoyo. **OpenAI (2026)** fue utilizado para resolver dudas técnicas, apoyar la identificación de errores, sugerir alternativas de implementación y colaborar en la elaboración de documentación.
+## Contenerización con Docker
 
-Las respuestas proporcionadas por la herramienta fueron revisadas y validadas por los integrantes del equipo antes de ser utilizadas en el proyecto.
+El `Dockerfile` utiliza una construcción en dos etapas:
 
-## Ejecución local con Docker Compose
+1. **Build:** `eclipse-temurin:21-jdk`, Maven Wrapper y empaquetado del JAR sin repetir pruebas dentro de la imagen.
+2. **Runtime:** `eclipse-temurin:21-jre-alpine`; copia el JAR, expone el puerto `8080` y ejecuta la aplicación con un usuario sin privilegios de administrador.
 
-El proyecto utiliza Docker Compose para ejecutar el microservicio `ms-pedido` junto con una base de datos MySQL 8.4.
+Esta separación permite usar una imagen de ejecución más liviana que la imagen de compilación. Las pruebas se realizan en los trabajos de CI/CD antes de publicar la imagen.
 
-Esta configuración permite levantar ambos servicios de forma conjunta, sin necesidad de instalar MySQL directamente en el computador.
+## Ejecución local y orquestación con Docker Compose
+
+El proyecto define dos servicios en `docker-compose.yml`:
+
+- `mysql`: base de datos MySQL 8.4, con volumen persistente `mysql_data` y comprobación de salud.
+- `ms-pedido`: aplicación Spring Boot, con puerto configurable, comprobación de salud, límites de memoria y CPU y dependencia de MySQL saludable.
+
+Ambos servicios comparten la red `ms-pedido-network`. El servicio de la aplicación puede utilizar una imagen construida localmente o una imagen publicada en GHCR mediante la variable `APP_IMAGE`.
 
 ### Requisitos
 
-Para ejecutar el proyecto se necesita:
+- Docker Desktop o Docker Engine con Docker Compose.
+- Repositorio descargado.
+- Variables de entorno configuradas.
 
-- Docker Desktop instalado y en ejecución.
-- Docker Compose disponible.
-- Tener descargado el repositorio del proyecto.
+### Archivo `.env`
 
-### Configuración de variables de entorno
-
-El proyecto incluye un archivo `.env.example` con las variables necesarias para configurar MySQL y el puerto de la aplicación.
-
-Desde la carpeta raíz del proyecto, crear una copia del archivo:
+En PowerShell, desde la raíz del proyecto:
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-Luego, abrir `.env` y reemplazar las contraseñas de ejemplo por contraseñas propias.
-
-Las variables utilizadas son:
+Editar `.env` con contraseñas propias. Las variables son:
 
 | Variable | Descripción |
-|---|---|
+| --- | --- |
 | `MYSQL_DATABASE` | Nombre de la base de datos. |
-| `MYSQL_USER` | Usuario utilizado por la aplicación para conectarse a MySQL. |
-| `MYSQL_PASSWORD` | Contraseña del usuario de MySQL. |
-| `MYSQL_ROOT_PASSWORD` | Contraseña del administrador de MySQL. |
-| `APP_PORT` | Puerto de acceso al microservicio desde el computador. |
+| `MYSQL_USER` | Usuario utilizado por la aplicación. |
+| `MYSQL_PASSWORD` | Contraseña de ese usuario. |
+| `MYSQL_ROOT_PASSWORD` | Contraseña del usuario administrador de MySQL. |
+| `APP_PORT` | Puerto de acceso desde el equipo anfitrión (predeterminado: `8080`). |
 
-El archivo `.env` está excluido del repositorio mediante `.gitignore`, para evitar publicar credenciales locales.
+`.env` no debe subirse al repositorio y está contemplado en `.gitignore`.
 
-### Construcción e inicio de contenedores
-
-Para construir la imagen de Spring Boot e iniciar los servicios, ejecutar:
+### Construcción e inicio
 
 ```powershell
 docker compose up --build -d
 ```
 
-Este comando construye la imagen del microservicio utilizando el `Dockerfile` y levanta los contenedores de Spring Boot y MySQL.
+El comando construye el microservicio con el Dockerfile y levanta los dos servicios en segundo plano.
 
-La opción `-d` permite ejecutarlos en segundo plano.
-
-### Verificación de los contenedores
-
-Para revisar el estado de los servicios:
+### Comprobaciones
 
 ```powershell
 docker compose ps
-```
-
-Se espera que los servicios `mysql` y `ms-pedido` estén en ejecución.
-
-MySQL incluye un `healthcheck` que comprueba su disponibilidad. Además, el servicio `ms-pedido` utiliza `depends_on` para esperar hasta que MySQL se encuentre saludable antes de iniciar.
-
-### Revisión de los logs
-
-Para consultar los registros del microservicio:
-
-```powershell
 docker compose logs ms-pedido
-```
-
-Para consultar los registros de MySQL:
-
-```powershell
 docker compose logs mysql
 ```
 
-Estos comandos permiten revisar el inicio de los servicios y detectar posibles errores de conexión.
-
-### Acceso a la API
-
-Por defecto, la aplicación utiliza el puerto `8080`.
-
-El endpoint de pedidos se encuentra disponible en:
+En Postman o mediante una petición HTTP se puede consultar:
 
 ```text
+http://localhost:8080/actuator/health
 http://localhost:8080/api/v1/pedidos
 ```
 
-Se puede realizar una solicitud GET desde Postman para consultar los pedidos registrados.
+Si `APP_PORT=8081`, las rutas locales pasan a utilizar el puerto `8081`; dentro del contenedor Spring Boot sigue atendiendo en `8080`.
 
-Si el puerto `8080` está ocupado, se puede modificar la variable `APP_PORT` del archivo `.env`, por ejemplo:
+### Persistencia y detención
 
-```env
-APP_PORT=8081
-```
-
-En ese caso, la dirección de acceso será:
-
-```text
-http://localhost:8081/api/v1/pedidos
-```
-
-El cambio de puerto afecta el acceso desde el computador, mientras que Spring Boot continúa utilizando el puerto `8080` dentro del contenedor.
-
-### Persistencia de los datos
-
-La configuración utiliza un volumen llamado `mysql_data`, asociado al directorio de almacenamiento de MySQL.
-
-Esto permite conservar los datos aunque los contenedores sean detenidos o recreados, siempre que no se elimine el volumen.
-
-### Detención de los servicios
-
-Para detener y retirar los contenedores:
+El volumen `mysql_data` conserva los datos cuando se detienen o recrean los contenedores, mientras el volumen no se elimine.
 
 ```powershell
 docker compose down
 ```
 
-Este comando conserva el volumen de MySQL.
-
-Para volver a iniciar los servicios:
+Para volver a iniciar:
 
 ```powershell
 docker compose up -d
 ```
 
-No se recomienda utilizar `docker compose down -v` si se desea conservar la información, ya que esa opción también elimina los volúmenes definidos por el proyecto.
+No utilizar `docker compose down -v` si se requiere conservar la información, ya que elimina los volúmenes asociados.
 
 ### Problemas frecuentes
 
-**Puerto ocupado:** si el puerto `8080` está siendo utilizado por otra aplicación, modificar `APP_PORT` en el archivo `.env` y recrear los contenedores.
+- **Puerto ocupado:** cambiar `APP_PORT` y recrear el contenedor.
+- **Docker detenido:** iniciar Docker Desktop o el servicio Docker.
+- **Error de MySQL:** revisar el estado y los registros del contenedor.
+- **Cambio de contraseñas:** modificar `.env` no actualiza automáticamente los usuarios ya creados en un volumen de MySQL existente.
+- **Despliegue SSH con timeout:** comprobar el estado de EC2 y la conectividad antes de volver a ejecutar un despliegue.
 
-**Docker no está iniciado:** verificar que Docker Desktop esté ejecutándose antes de utilizar Docker Compose.
+## Evidencias para la Entrega 2
 
-**Error de conexión con MySQL:** revisar el estado del servicio y sus registros mediante `docker compose ps` y `docker compose logs mysql`.
+| Indicador | Evidencia disponible o por comprobar |
+| --- | --- |
+| IE1 — Contenedores | `Dockerfile`, `docker-compose.yml` y construcción automatizada en `cd-main.yml`. |
+| IE2 — Pruebas | `PedidoServiceTest.java` en `develop`, reportes Maven y ejecución exitosa CI #42 del commit `0ed9043`. |
+| IE3 — Seguridad | `security-pipeline.yml`, resultados Snyk y SonarCloud, alertas de Dependabot y configuración de bloqueo por severidad alta/crítica. |
+| IE4 — Despliegue | `cd-main.yml`, historial de publicación en GHCR, despliegue anterior exitoso y resultado del smoke test; revisar el fallo SSH posterior. |
+| IE5 — Orquestación | `docker-compose.yml`, servicios, healthchecks, límites de recursos y ejecución exitosa de integración con Docker Compose. |
 
-**Cambios en las contraseñas:** las variables de inicialización de MySQL se aplican cuando se crea una base de datos nueva. Si ya existe un volumen con datos, modificar `.env` no cambia automáticamente las contraseñas almacenadas en MySQL.
+Las capturas y resultados deben corresponder a ejecuciones reales. Una ejecución histórica exitosa no implica que la versión más reciente se haya desplegado correctamente.
+
+## Responsabilidades y revisión
+
+Los integrantes del equipo participan en el desarrollo, la revisión de Pull Requests y la verificación de los pipelines. Antes de fusionar cambios se revisan las pruebas, los controles de seguridad y la descripción del Pull Request. Los problemas detectados se registran y se corrigen mediante nuevas ramas o tareas de seguimiento.
+
+## Uso de inteligencia artificial
+
+Se utilizó ChatGPT como apoyo para comprender errores de Git, GitHub Actions y Docker, organizar verificaciones y mejorar la claridad de la documentación. Las configuraciones, resultados y decisiones que se presenten deben ser comprobados y validados por el equipo. Las justificaciones técnicas finales, conclusiones y reflexiones individuales deben ser escritas por sus integrantes sin asistencia de IA, conforme a la pauta de evaluación.
+
+## Conclusiones individuales
+
+Las reflexiones personales se encuentran en la carpeta `conclusiones/`. Cada integrante debe revisar y mantener allí un texto propio sobre sus contribuciones, aprendizajes y dificultades, sin redacción asistida por IA.
