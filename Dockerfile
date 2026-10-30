@@ -7,6 +7,7 @@ WORKDIR /app
 COPY mvnw .
 COPY .mvn/ .mvn/
 COPY pom.xml .
+RUN chmod +x mvnw
 
 # Descarga dependencias (offline) para que queden en caché si no cambia pom.xml
 RUN ./mvnw -B dependency:go-offline
